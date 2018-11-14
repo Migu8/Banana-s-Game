@@ -13,20 +13,26 @@ var images = {
     gaspa: "images/gasparin.png",
     base: "images/base.PNG",
     power: "images/powerJump.png",
-    minion: "./images/minion1.png"
+    minion: "./images/minion1.png",
+    minion2: "./images/minion2.png"
 }
+var audios = {
+    audioJuego: "./audios/flauta.mp3",
+    audioGO: "./audios/gameOver.mp3"
+}
+
+var audio = new Audio()
+
 
 var platanitos=0
 var bases = [
     {
-
+        //Aquí va la primer base
     }
 ]
 var bananitos = []
 var base_height = 20
 var base_width = 300
-//var friction = 0.8
-//var gravity = 0.7
 
 //Clases
 function Board(){
@@ -36,9 +42,7 @@ function Board(){
     this.height = canvas.height
     this.image = new Image()
     this.image.src = images.bg1
-    //this.jumping = false
     
-
     this.draw = function(){
         this.x--
         if(this.x < -this.width) this.x=0
@@ -76,10 +80,10 @@ function Base(alto, base_width){
     }
 }
 
-function Platanitos(){
+function Platanitos(alto2){
     Base.call(this)
     this.x=canvas.width+600
-    this.y = 100
+    this.y = alto2 
     this.width = 30
     this.height = 35
     this.image.src = images.banana
@@ -94,10 +98,10 @@ function PowerUps(){
 
 }
 
-function Character(){
+function Character(src){
     Board.call(this)
-    this.x = 350
-    this.y = 50
+    this.x = 150
+    this.y = 80
     this.width = 50
     this.height = 70
     this.gravity = 3
@@ -105,13 +109,7 @@ function Character(){
     this.jumping = false
     this.velX=0
     this.velY=0
-    /*
-    var velX = 0
-    var velY = 0
-    jumping: false
-    jumpStrenth: 8
-    */
-    this.image.src = images.logo
+    this.image.src = src
 
     this.draw = function(){
         this.boundaries()
@@ -122,6 +120,8 @@ function Character(){
     this.boundaries = function(){
         if(this.y <10){
             this.y =10
+        }else if(frames<500){
+            this.y === this.y
         }else this.y +=this.gravity
     }
 
@@ -145,11 +145,7 @@ function Character(){
     }
 
     this.willDie = function(canvas){
-        //Si toca el canvas.height -30, muere
-        //console.log(this.y)
-        //console.log(item.height)
         return (this.y > canvas.height-(this.height*2))
-        //return(this.y<canvas.height-100)
     }
 
     this.minionGetsTheBanana = function(item){
@@ -157,65 +153,60 @@ function Character(){
         (this.x + this.width > item.x)&&
         (this.y < item.y +item.height)&&
         (this.y + this.height >item.y)
-        //Opción 2
-        /*
-        return (this.x < item.x + item.width)&&
-        //(this.x + this.width > item.x)&&
-        //(this.y < item.y +item.height)&&
-        (this.y+(this.height/2) === item.y+(item.height/2))
-        */
     }
 }
 
 //Instancias
 var bg1 = new Board()
-var minion = new Character()
-//var bases = new Base()
+//Si el usuario presiona jugar para 2, crea la siguiente instancia
+//de lo contrario, sólo crea la a minion
+var minion2 = new Character(images.minion2)
+
+var minion = new Character(images.logo)
 var bananitos = new Platanitos()
 var bases = []
 
 
 //Main function
 function start(){
+    audio.src = audios.audioJuego
+    audio.play()
     bananitos = []
     frames =0
     var minion = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
-    //console.log(interval)
+    //audio.play()
 }
 
 function update(){
     frames++
+    //audioJuego.play()
     ctx.clearRect(0,0,canvas.width, canvas.height)
     bg1.draw()
     minion.draw()
+    minion2.draw()
     minion.pisandoBase()
     drawBases()
     drawBananos()
     console.log(platanitos)
-    //console.log(minion.jumping)
-    //checkMinionGetsBanana()
     bg1.drawPlatanitos()
     bg1.drawScore()
-    //groundedCheck()
-    //willDie()
     minionDies()
-    //console.log(bases)
 }
 
 function gameOver(){
     clearInterval(interval)
+    audio.pause()
+    audio.src = audios.audioGO
+    audio.play()
     interval=null
-    ctx.fillStyle = "red"
+    ctx.fillStyle = "white"
     ctx.font = "bold 50px Arial"
-    ctx.fillText("GAME OVER", 50,200)
+    ctx.fillText("GAME OVER", 240,200)
+    ctx.font = "bold 20px Arial"
+    ctx.fillText("Final score: "+Math.floor(frames/60) , 320,250)
+    ctx.fillText("Presiona enter para reiniciar", 260,300)
 }
-
-/*
-function BananasPickedUp(){
-    platanitos++
-}
-*/
 
 //Aux functions
 function drawCover (){
@@ -225,23 +216,28 @@ function drawCover (){
         bg1.draw()
         ctx.drawImage(img, 140,150,70,90)
         ctx.font= "32px Lucida"
-        ctx.fillText("Presiona 'S' para comenzar", 210,50)
+        ctx.fillText("Presiona 'Enter' para comenzar", 210,50)
+
     }
 }
 
 //Bases
+function firstBase(){
+    this.x=0
+    this.y=300
+    bases.push(new Base())
+}
+
 function generatingBases(){
-    //ctx.fillStyle="darkblue"
-    //ctx.fillRect(x=0, y=canvas.height-200, width=base_width, height=base_height)
     if(frames%80===0){
         var alto = Math.floor((Math.random()*70+300))
         var largo = Math.floor(Math.random()*50+ base_width)
-        //var gap = Math.floor(Math.random()*100+360)
         bases.push(new Base(alto, largo))
     }
 }
 
 function drawBases(){
+    //firstBase()
     generatingBases()
     for(var base of bases){
         bases.forEach(function(base){
@@ -252,11 +248,9 @@ function drawBases(){
 
 //Bananas
 function generatingBananos(){
-    //ctx.fillStyle="darkblue"
-    //ctx.fillRect(x=0, y=canvas.height-200, width=base_width, height=base_height)
     if(frames%250===0){
-        //var gap = Math.floor(Math.random()*100+360)
-        bananitos.push(new Platanitos())
+        var alto2 = Math.floor((Math.random()*70+250))
+        bananitos.push(new Platanitos(alto2))
     }
 }
 
@@ -272,7 +266,6 @@ function drawBananos(){
         })
     }
 }
-
 
 function groundedCheck(minion, base){
     var vecX = (minion.x + (minion.width/2) - (base.x + base_width/2))
@@ -308,28 +301,17 @@ function groundedCheck(minion, base){
     return collisionD
 }
 
-
 function minionDies(){
     if(minion.willDie(canvas)){
         gameOver()
     }
 }
 
-/*
-function checkMinionGetsBanana(minion){
-    for (var bananito of bananitos){
-        if(minion.minionGetsTheBanana(bananito)){
-            //bananitos.splice(item,1)
-            BananasPickedUp()
-        }
-    }
-}
-*/
-
 //Listeners
+//Start
 addEventListener('keyup', function(e){
     switch(e.keyCode){
-        case 83:
+        case 13:
             if(interval>0) return
             //
             start()
@@ -339,32 +321,45 @@ addEventListener('keyup', function(e){
     }
 })
 
+//Jump
 addEventListener('keyup', function(e){
     switch(e.keyCode){
-        case 32:
-            /*
+        case 38:
             if(!minion.jumping){
                 minion.velY = -minion.jumpStrenth*2
                 minion.jumping=true
+            }else{
+                minion.y-=155
             }
-            */
-            minion.y-=155
             break
         default:
             break
     }
 })
 
+//Down
 addEventListener('keyup', function(e){
     switch(e.keyCode){
         case 40:
             if(minion.grounded===true){
-                minion.y=minion.y
+                break
             }else{
                 minion.y+=100
                 break
             }
+            default:
+            break
+    }
+})
 
+//PowerUp
+addEventListener('keyup', function(e){
+    switch(e.keyCode){
+        case 32:
+            if(minion.x<500){
+                minion.x+=200
+            } else minion.x=550
+            break
         default:
             break
     }
