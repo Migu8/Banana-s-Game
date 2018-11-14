@@ -24,7 +24,7 @@ var bases = [
 ]
 var bananitos = []
 var base_height = 20
-var base_width =350
+var base_width = 300
 //var friction = 0.8
 //var gravity = 0.7
 
@@ -56,18 +56,22 @@ function Board(){
         ctx.font = "bold 24px Avenir"
         ctx.fillText("Score: "+ Math.floor(frames/60), 20,20)
     }
+
+    this.drawPowerUps = function(){
+
+    }
 }
 
-function Base(width){
+function Base(alto, base_width){
     this.x=canvas.width
-    this.y = 400
+    this.y = alto
     this.width = base_width
     this.height = 25
     this.image = new Image()
     this.image.src = images.base
     
     this.draw=function(){
-        this.x-=0.7
+        this.x-=0.6
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
@@ -75,7 +79,7 @@ function Base(width){
 function Platanitos(){
     Base.call(this)
     this.x=canvas.width+600
-    this.y = 300
+    this.y = 100
     this.width = 30
     this.height = 35
     this.image.src = images.banana
@@ -86,13 +90,17 @@ function Platanitos(){
     }
 }
 
+function PowerUps(){
+
+}
+
 function Character(){
     Board.call(this)
     this.x = 350
     this.y = 50
     this.width = 50
     this.height = 70
-    this.gravity = 1.7
+    this.gravity = 3
     this.grounded = false
     this.jumping = false
     this.velX=0
@@ -127,7 +135,7 @@ function Character(){
                 this.jumping=false
                 this.grounded=true
             }else if(direction =="saltando"){
-                this.velY=-1
+                this.velY=-3
                 this.jumping=true
             }
         }
@@ -162,16 +170,18 @@ function Character(){
 //Instancias
 var bg1 = new Board()
 var minion = new Character()
-var bases = new Base()
+//var bases = new Base()
 var bananitos = new Platanitos()
+var bases = []
+
 
 //Main function
 function start(){
-    bases = []
     bananitos = []
     frames =0
     var minion = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
+    //console.log(interval)
 }
 
 function update(){
@@ -190,7 +200,7 @@ function update(){
     //groundedCheck()
     //willDie()
     minionDies()
-    console.log(bases)
+    //console.log(bases)
 }
 
 function gameOver(){
@@ -223,10 +233,11 @@ function drawCover (){
 function generatingBases(){
     //ctx.fillStyle="darkblue"
     //ctx.fillRect(x=0, y=canvas.height-200, width=base_width, height=base_height)
-    if(frames%60===0){
-        var width = Math.floor(Math.random()*100)
+    if(frames%80===0){
+        var alto = Math.floor((Math.random()*70+300))
+        var largo = Math.floor(Math.random()*50+ base_width)
         //var gap = Math.floor(Math.random()*100+360)
-        bases.push(new Base(width))
+        bases.push(new Base(alto, largo))
     }
 }
 
@@ -320,6 +331,7 @@ addEventListener('keyup', function(e){
     switch(e.keyCode){
         case 83:
             if(interval>0) return
+            //
             start()
             break
         default:
