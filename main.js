@@ -15,10 +15,11 @@ var images = {
     banana: "images/banana.png",
     base: "images/base.png",
     minion: "images/minion1.png",
-    minion2: "images/minion2.png"
+    minion2: "images/minion2.png",
+    brocoli: "images/brocoli.png"
 }
 var audios = {
-    audioJuego: "audios/flauta.mp3",
+    audioJuego: "audios/marioParty.mp3",
     audioGO: "audios/gameOver.mp3"
 }
 
@@ -28,6 +29,7 @@ var platanitosP1=0
 var platanitosP2=0
 var bananitos = []
 var bananotes = []
+//var bananosMalos = []
 var base_height = 20
 var base_width = 300
 
@@ -96,6 +98,20 @@ function Platanotes(alto3){
 
     this.draw=function(){
         this.x-=2
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
+}
+
+function PlatanosMalos(alto4){
+    Base.call(this)
+    this.x=canvas.width+600
+    this.y = alto2 
+    this.width = 40
+    this.height = 55
+    this.image.src = images.brocoli
+
+    this.draw=function(){
+        this.x-=3
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
@@ -181,10 +197,10 @@ function Character(src){
 //Instancias
 var bg1 = new Board()
 var minion2 = new Character(images.minion2)
-
 var minion = new Character(images.logo)
 var bananitos = new Platanitos()
 var bananotes = new Platanotes()
+//var bananosMalos = new PlatanosMalos()
 var bases = []
 
 
@@ -194,6 +210,7 @@ function start(){
     audio.play()
     bananitos = []
     bananotes = []
+    //bananosMalos = []
     var minion = new Character()
     var minion2 = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
@@ -212,6 +229,7 @@ function update(){
     drawBases()
     drawBananos()
     drawBananotes()
+    //drawBananosMalos()
     //console.log(platanitos)
     bg1.drawPlatanitos()
     console.log(frames)
@@ -236,14 +254,21 @@ function gameOver(){
 function drawCover (){
     var img =new Image()
     var img2=new Image()
+    var img3=new Image()
     img.src = images.logo
     img2.src = images.minion2
+    img3.src = images.banana
     img.onload = function(){
+        ctx.font= "34px Lucida"
         bg1.draw()
+        ctx.fillText("Presiona 'Enter' para comenzar el juego", 140,50)
         ctx.drawImage(img, 140,150,70,90)
-        ctx.drawImage(img2, 180,220,70,90)
-        ctx.font= "24px Lucida"
-        ctx.fillText("Presiona 'Enter' para comenzar o 'I' para conocer las instrucciones del juego", 40,50)
+    }
+    img2.onload = function(){
+        ctx.drawImage(img2, 200,250,70,90)
+    }
+    img3.onload = function(){
+        ctx.drawImage(img3, 400,250,40,30)
     }
 }
 
@@ -313,6 +338,31 @@ function drawBananotes(){
             }
         })
     }
+}
+
+//Bananos malas
+function generatingBananosMalos(alto4){
+    if(frames%190===0){
+        var alto4 = Math.floor((Math.random()*100+290))
+        bananosMalos.push(new PlatanosMalos(alto4))
+    }
+}
+
+function drawBananosMalos(){
+    generatingBananosMalos()
+    //for(var bananito of bananitos){
+        bananosMalos.forEach(function(bananoMalo, index){
+            bananoMalo.draw()
+            if(minion.minionGetsTheBanana(bananoMalo)){
+                platanitosP1-=3
+                bananosMalos.splice(index,1)
+            }
+            if(minion2.minionGetsTheBanana(bananoMalo)){
+                platanitosP2-=3
+                bananosMalos.splice(index,1)
+            }
+        })
+    //}
 }
 
 function groundedCheck(minion, base){
