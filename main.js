@@ -4,7 +4,7 @@ ctx = canvas.getContext('2d')
 
 //Variables
 var interval
-var contador = 60
+var contador = 30
 var restante
 
 var frames = 0
@@ -55,8 +55,8 @@ function Board(){
         ctx.fillText("Jugador 1: "+platanitosP1, 30,20)
         ctx.font="bold 25px Arial"
         ctx.fillText("Jugador 2: "+platanitosP2, 630,20)
-        ctx.font="bold 25px Arial"
-        ctx.fillText("Tiempo restante: "+restante,310,20)
+        ctx.font="bold 20px Arial"
+        ctx.fillText("Tiempo restante: "+restante+" segundos",270,20)
     }
 }
 
@@ -232,6 +232,9 @@ function update(){
     //drawBananosMalos()
     //console.log(platanitos)
     bg1.drawPlatanitos()
+    if(restante===0){
+        gameOver()
+    }
     console.log(frames)
 }
 
