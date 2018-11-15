@@ -4,6 +4,8 @@ ctx = canvas.getContext('2d')
 
 //Variables
 var interval
+var contador = 60
+
 var frames = 0
 var images = {
     bg1: "./images/bg1.png",
@@ -30,6 +32,7 @@ var bases = [
     }
 ]
 var bananitos = []
+var bananotes = []
 var base_height = 20
 var base_width = 300
 
@@ -52,19 +55,11 @@ function Board(){
     this.drawPlatanitos = function(){
         ctx.fillStyle="white"
         ctx.font="bold 25px Arial"
-        ctx.fillText("Jugador 1: "+platanitosP1, 630,20)
+        ctx.fillText("Jugador 1: "+platanitosP1, 30,20)
         ctx.font="bold 25px Arial"
-        ctx.fillText("Jugador 2: "+platanitosP2, 630,50)
-    }
-
-    /*
-    this.drawScore = function(){
-        ctx.font = "bold 24px Avenir"
-        ctx.fillText("Score: "+ Math.floor(frames/60), 20,20)
-    }*/
-
-    this.drawPowerUps = function(){
-
+        ctx.fillText("Jugador 2: "+platanitosP2, 630,20)
+        ctx.font="bold 25px Arial"
+        ctx.fillText("Tiempo restante: "+contador,310,20)
     }
 }
 
@@ -82,21 +77,6 @@ function Base(alto, base_width){
     }
 }
 
-/*
-function BaseP(){
-    this.x=0
-    this.y = 550
-    this.width = canvas.width
-    this.height = 25
-    this.image = new Image()
-    this.image.src = images.base
-    
-    this.draw=function(){
-        this.x--
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
-    }
-}*/
-
 function Platanitos(alto2){
     Base.call(this)
     this.x=canvas.width+600
@@ -106,13 +86,23 @@ function Platanitos(alto2){
     this.image.src = images.banana
 
     this.draw=function(){
-        this.x-=2
+        this.x--
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
 
-function PowerUps(){
+function Platanotes(alto2){
+    Base.call(this)
+    this.x=canvas.width+600
+    this.y = alto2 
+    this.width = 60
+    this.height = 75
+    this.image.src = images.banana
 
+    this.draw=function(){
+        this.x--
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
 }
 
 function Character(src){
@@ -140,6 +130,11 @@ function Character(src){
         }else if(this.y>(canvas.height-130)){
             this.y = (canvas.height-130)
         }else this.y+=this.gravity
+
+        //Para que regrese al canvas
+        if(this.x<canvas.x-100){
+            this.x = 50
+        }
     }
 
     this.pisandoBase= function(){
@@ -199,6 +194,7 @@ var minion2 = new Character(images.minion2)
 
 var minion = new Character(images.logo)
 var bananitos = new Platanitos()
+var bananotes = new Platanotes()
 var bases = []
 
 
@@ -207,7 +203,7 @@ function start(){
     audio.src = audios.audioJuego
     audio.play()
     bananitos = []
-    frames =0
+    bananotes = []
     var minion = new Character()
     var minion2 = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
@@ -216,6 +212,10 @@ function start(){
 
 function update(){
     frames++
+    contador -(frames/60)
+    if(contador ===0){
+        gameOver()
+    }
     //audioJuego.play()
     ctx.clearRect(0,0,canvas.width, canvas.height)
     bg1.draw()
@@ -225,6 +225,7 @@ function update(){
     minion2.pisandoBase2()
     drawBases()
     drawBananos()
+    drawBananotes()
     //console.log(platanitos)
     bg1.drawPlatanitos()
     //bg1.drawScore()
@@ -282,7 +283,7 @@ function drawBases(){
     }
 }
 
-//Bananas
+//Bananas chicas
 function generatingBananos(alto2){
     if(frames%90===0){
         var alto2 = Math.floor((Math.random()*190+90))
@@ -302,6 +303,31 @@ function drawBananos(){
             if(minion2.minionGetsTheBanana(bananito)){
                 platanitosP2++
                 bananitos.splice(index,1)
+            }
+        })
+    }
+}
+
+//Bananas grandes
+function generatingBananotes(alto3){
+    if(frames%290===0){
+        var alto3 = Math.floor((Math.random()*150+90))
+        bananotes.push(new Platanotes(alto3))
+    }
+}
+
+function drawBananotes(){
+    generatingBananotes()
+    for(var bananote of bananotes){
+        bananotes.forEach(function(bananote, index){
+            bananote.draw()
+            if(minion.minionGetsTheBanana(bananote)){
+                platanitosP1+=5
+                bananotes.splice(index,1)
+            }
+            if(minion2.minionGetsTheBanana(bananote)){
+                platanitosP2+=5
+                bananotes.splice(index,1)
             }
         })
     }
