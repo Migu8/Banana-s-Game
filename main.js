@@ -5,32 +5,27 @@ ctx = canvas.getContext('2d')
 //Variables
 var interval
 var contador = 60
+var restante
 
 var frames = 0
 var images = {
-    bg1: "./images/bg1.png",
+    bg1: "images/bg1.png",
     bg2: "images/bg2.png",
     logo: "images/minion_logo.png",
     banana: "images/banana.png",
-    base: "images/base.PNG",
-    minion: "./images/minion1.png",
-    minion2: "./images/minion2.png"
+    base: "images/base.png",
+    minion: "images/minion1.png",
+    minion2: "images/minion2.png"
 }
 var audios = {
-    audioJuego: "./audios/flauta.mp3",
-    audioGO: "./audios/gameOver.mp3"
+    audioJuego: "audios/flauta.mp3",
+    audioGO: "audios/gameOver.mp3"
 }
 
 var audio = new Audio()
 
-
 var platanitosP1=0
 var platanitosP2=0
-var bases = [
-    {
-        //Aquí va la primer base
-    }
-]
 var bananitos = []
 var bananotes = []
 var base_height = 20
@@ -59,12 +54,12 @@ function Board(){
         ctx.font="bold 25px Arial"
         ctx.fillText("Jugador 2: "+platanitosP2, 630,20)
         ctx.font="bold 25px Arial"
-        ctx.fillText("Tiempo restante: "+contador,310,20)
+        ctx.fillText("Tiempo restante: "+restante,310,20)
     }
 }
 
 function Base(alto, base_width){
-    this.x=canvas.width
+    this.x= canvas.width
     this.y = alto
     this.width = base_width
     this.height = 25
@@ -91,27 +86,27 @@ function Platanitos(alto2){
     }
 }
 
-function Platanotes(alto2){
+function Platanotes(alto3){
     Base.call(this)
-    this.x=canvas.width+600
-    this.y = alto2 
     this.width = 60
     this.height = 75
+    this.x=canvas.width+600
+    this.y = alto3
     this.image.src = images.banana
 
     this.draw=function(){
-        this.x--
+        this.x-=2
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
 
 function Character(src){
     Board.call(this)
-    this.x = 150
-    this.y = 80
+    this.x = 220
+    this.y = 380
     this.width = 50
     this.height = 70
-    this.gravity = 2
+    this.gravity = 3.5
     this.grounded = false
     this.jumping = false
     this.velX=0
@@ -130,11 +125,6 @@ function Character(src){
         }else if(this.y>(canvas.height-130)){
             this.y = (canvas.height-130)
         }else this.y+=this.gravity
-
-        //Para que regrese al canvas
-        if(this.x<canvas.x-100){
-            this.x = 50
-        }
     }
 
     this.pisandoBase= function(){
@@ -212,24 +202,19 @@ function start(){
 
 function update(){
     frames++
-    contador -(frames/60)
-    if(contador ===0){
-        gameOver()
-    }
-    //audioJuego.play()
-    ctx.clearRect(0,0,canvas.width, canvas.height)
+    restante = Math.floor(contador - (frames/60))
     bg1.draw()
     minion.draw()
     minion2.draw()
     minion.pisandoBase()
     minion2.pisandoBase2()
+    console.log(minion.velY)
     drawBases()
     drawBananos()
     drawBananotes()
     //console.log(platanitos)
     bg1.drawPlatanitos()
-    //bg1.drawScore()
-    //minionDies()
+    console.log(frames)
 }
 
 function gameOver(){
@@ -243,57 +228,54 @@ function gameOver(){
     ctx.fillText("GAME OVER", 240,200)
     ctx.font = "bold 20px Arial"
     ctx.fillText("Final score: "+Math.floor(frames/60) , 320,250)
+    
     ctx.fillText("Presiona enter para reiniciar", 260,300)
 }
 
 //Aux functions
 function drawCover (){
     var img =new Image()
+    var img2=new Image()
     img.src = images.logo
+    img2.src = images.minion2
     img.onload = function(){
         bg1.draw()
         ctx.drawImage(img, 140,150,70,90)
-        ctx.font= "32px Lucida"
-        ctx.fillText("Presiona 'Enter' para comenzar", 210,50)
+        ctx.drawImage(img2, 180,220,70,90)
+        ctx.font= "24px Lucida"
+        ctx.fillText("Presiona 'Enter' para comenzar o 'I' para conocer las instrucciones del juego", 40,50)
     }
 }
 
 //Bases
-function firstBase(){
-    this.x=0
-    this.y=300
-    bases.push(new Base())
-}
-
 function generatingBases(alto, largo){
-    if(frames%80===0){
-        var alto = Math.floor((Math.random()*470+210))
+    if(frames%120===0){
+        var alto = Math.floor((Math.random()*300+310))
         var largo = Math.floor(Math.random()*50+ base_width)
         bases.push(new Base(alto, largo))
     }
 }
 
 function drawBases(){
-    //firstBase()
     generatingBases()
     for(var base of bases){
-        bases.forEach(function(base){
+      //  bases.forEach(function(base){
             base.draw()
-        })
+       // })
     }
 }
 
 //Bananas chicas
 function generatingBananos(alto2){
-    if(frames%90===0){
-        var alto2 = Math.floor((Math.random()*190+90))
+    if(frames%150===0){
+        var alto2 = Math.floor((Math.random()*100+290))
         bananitos.push(new Platanitos(alto2))
     }
 }
 
 function drawBananos(){
     generatingBananos()
-    for(var bananito of bananitos){
+    //for(var bananito of bananitos){
         bananitos.forEach(function(bananito, index){
             bananito.draw()
             if(minion.minionGetsTheBanana(bananito)){
@@ -305,13 +287,13 @@ function drawBananos(){
                 bananitos.splice(index,1)
             }
         })
-    }
+    //}
 }
 
 //Bananas grandes
 function generatingBananotes(alto3){
     if(frames%290===0){
-        var alto3 = Math.floor((Math.random()*150+90))
+        var alto3 = Math.floor((Math.random()*100+250))
         bananotes.push(new Platanotes(alto3))
     }
 }
@@ -367,7 +349,7 @@ function groundedCheck(minion, base){
     return collisionD
 }
 
-function groundedCheck2(minion, base){
+function groundedCheck2(minion2, base){
     var vecX = (minion2.x + (minion2.width/2) - (base.x + base_width/2))
     var vecY = (minion2.y + (minion2.height/2) - (base.y + base_height/2))
 
@@ -424,14 +406,12 @@ addEventListener('keyup', function(e){
 
 //Minion 1
     //Jump
-    addEventListener('keyup', function(e){
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
             case 38:
                 if(!minion.jumping){
-                    minion.velY = -minion.jumpStrenth*2
-                    minion.jumping=true
-                }else{
                     minion.y-=155
+                    minion.jumping===true
                 }
                 break
             default:
@@ -440,7 +420,7 @@ addEventListener('keyup', function(e){
     })
 
     //Down
-    addEventListener('keyup', function(e){
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
             case 40:
                 if(minion.grounded===true){
@@ -454,24 +434,32 @@ addEventListener('keyup', function(e){
         }
     })
 
-    /*
-    //PowerUp
-    addEventListener('keyup', function(e){
+    //Right
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
-            case 32:
-                if(minion.x<500){
-                    minion.x+=200
-                } else minion.x=550
+            case 39:
+                minion.x+=100
                 break
             default:
-                break
+            break
         }
     })
-    */
+    
+    //Left
+    addEventListener('keydown', function(e){
+        switch(e.keyCode){
+            case 37:
+                minion.x-=100
+                break
+            default:
+            break
+        }
+    })
+
 
 //Minion 2
     //Jump
-    addEventListener('keyup', function(e){
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
             case 87:
                 if(!minion2.jumping){
@@ -487,7 +475,7 @@ addEventListener('keyup', function(e){
     })
 
     //Down
-    addEventListener('keyup', function(e){
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
             case 83:
                 if(minion2.grounded===true){
@@ -501,20 +489,26 @@ addEventListener('keyup', function(e){
         }
     })
 
-    /*
-    //PowerUp
-    addEventListener('keyup', function(e){
+    //Right
+    addEventListener('keydown', function(e){
         switch(e.keyCode){
-            case 32:
-                if(minion.x<500){
-                    minion.x+=200
-                } else minion.x=550
+            case 68:
+                minion2.x+=100
                 break
             default:
-                break
+            break
         }
     })
-    */
-
+    
+    //Left
+    addEventListener('keydown', function(e){
+        switch(e.keyCode){
+            case 65:
+                minion2.x-=100
+                break
+            default:
+            break
+        }
+    })
 
 drawCover()
