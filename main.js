@@ -4,7 +4,7 @@ ctx = canvas.getContext('2d')
 
 //Variables
 var interval
-var contador = 30
+var contador = 20
 var restante
 
 var frames = 0
@@ -246,11 +246,14 @@ function gameOver(){
     interval=null
     ctx.fillStyle = "white"
     ctx.font = "bold 50px Arial"
-    ctx.fillText("GAME OVER", 240,200)
+    ctx.fillText("GAME FINISHED", 200,200)
     ctx.font = "bold 20px Arial"
-    ctx.fillText("Final score: "+Math.floor(frames/60) , 320,250)
+    ctx.fillText("Final score: " , 330,250)
     
-    ctx.fillText("Presiona enter para reiniciar", 260,300)
+    ctx.fillText("Jugador 1:"+platanitosP1, 310,300)
+    ctx.fillText("Jugador 2:"+platanitosP2, 310,330)
+
+    ctx.fillText("Gana: ", 310,360)
 }
 
 //Aux functions
@@ -258,9 +261,13 @@ function drawCover (){
     var img =new Image()
     var img2=new Image()
     var img3=new Image()
+    var img4=new Image()
+    var img5=new Image()
     img.src = images.logo
     img2.src = images.minion2
     img3.src = images.banana
+    img4.src = images.base
+    img5.src = images.base
     img.onload = function(){
         ctx.font= "34px Lucida"
         bg1.draw()
@@ -268,10 +275,16 @@ function drawCover (){
         ctx.drawImage(img, 140,150,70,90)
     }
     img2.onload = function(){
-        ctx.drawImage(img2, 200,250,70,90)
+        ctx.drawImage(img2, 250,270,70,90)
     }
     img3.onload = function(){
         ctx.drawImage(img3, 400,250,40,30)
+    }
+    img4.onload = function(){
+        ctx.drawImage(img4, 200,350,430,30)
+    }
+    img5.onload = function(){
+        ctx.drawImage(img5, 0,235,230,30)
     }
 }
 
