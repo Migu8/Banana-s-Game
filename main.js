@@ -10,9 +10,7 @@ var images = {
     bg2: "images/bg2.png",
     logo: "images/minion_logo.png",
     banana: "images/banana.png",
-    gaspa: "images/gasparin.png",
     base: "images/base.PNG",
-    power: "images/powerJump.png",
     minion: "./images/minion1.png",
     minion2: "./images/minion2.png"
 }
@@ -24,7 +22,8 @@ var audios = {
 var audio = new Audio()
 
 
-var platanitos=0
+var platanitosP1=0
+var platanitosP2=0
 var bases = [
     {
         //Aquí va la primer base
@@ -53,13 +52,16 @@ function Board(){
     this.drawPlatanitos = function(){
         ctx.fillStyle="white"
         ctx.font="bold 25px Arial"
-        ctx.fillText("Platanitos: "+platanitos, 630,20)
+        ctx.fillText("Jugador 1: "+platanitosP1, 630,20)
+        ctx.font="bold 25px Arial"
+        ctx.fillText("Jugador 2: "+platanitosP2, 630,50)
     }
 
+    /*
     this.drawScore = function(){
         ctx.font = "bold 24px Avenir"
         ctx.fillText("Score: "+ Math.floor(frames/60), 20,20)
-    }
+    }*/
 
     this.drawPowerUps = function(){
 
@@ -75,10 +77,25 @@ function Base(alto, base_width){
     this.image.src = images.base
     
     this.draw=function(){
-        this.x-=0.6
+        this.x--
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
+
+/*
+function BaseP(){
+    this.x=0
+    this.y = 550
+    this.width = canvas.width
+    this.height = 25
+    this.image = new Image()
+    this.image.src = images.base
+    
+    this.draw=function(){
+        this.x--
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
+}*/
 
 function Platanitos(alto2){
     Base.call(this)
@@ -104,7 +121,7 @@ function Character(src){
     this.y = 80
     this.width = 50
     this.height = 70
-    this.gravity = 3
+    this.gravity = 2
     this.grounded = false
     this.jumping = false
     this.velX=0
@@ -120,9 +137,9 @@ function Character(src){
     this.boundaries = function(){
         if(this.y <10){
             this.y =10
-        }else if(frames<500){
-            this.y === this.y
-        }else this.y +=this.gravity
+        }else if(this.y>(canvas.height-130)){
+            this.y = (canvas.height-130)
+        }else this.y+=this.gravity
     }
 
     this.pisandoBase= function(){
@@ -144,9 +161,29 @@ function Character(src){
         }
     }
 
+    this.pisandoBase2= function(){
+        this.grounded
+        for(var i=0; i<bases.length; i++){
+            var direction = groundedCheck2(minion2, bases[i])
+            if(direction === true){
+                this.velX=0
+            }else if(direction=="plantado"){
+                this.jumping=false
+                this.grounded=true
+            }else if(direction =="saltando"){
+                this.velY=-3
+                this.jumping=true
+            }
+        }
+        if(this.grounded){
+            this.velY=0
+        }
+    }
+
+    /*
     this.willDie = function(canvas){
         return (this.y > canvas.height-(this.height*2))
-    }
+    }*/
 
     this.minionGetsTheBanana = function(item){
         return (this.x < item.x + item.width)&&
@@ -158,8 +195,6 @@ function Character(src){
 
 //Instancias
 var bg1 = new Board()
-//Si el usuario presiona jugar para 2, crea la siguiente instancia
-//de lo contrario, sólo crea la a minion
 var minion2 = new Character(images.minion2)
 
 var minion = new Character(images.logo)
@@ -174,6 +209,7 @@ function start(){
     bananitos = []
     frames =0
     var minion = new Character()
+    var minion2 = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
     //audio.play()
 }
@@ -186,12 +222,13 @@ function update(){
     minion.draw()
     minion2.draw()
     minion.pisandoBase()
+    minion2.pisandoBase2()
     drawBases()
     drawBananos()
-    console.log(platanitos)
+    //console.log(platanitos)
     bg1.drawPlatanitos()
-    bg1.drawScore()
-    minionDies()
+    //bg1.drawScore()
+    //minionDies()
 }
 
 function gameOver(){
@@ -217,7 +254,6 @@ function drawCover (){
         ctx.drawImage(img, 140,150,70,90)
         ctx.font= "32px Lucida"
         ctx.fillText("Presiona 'Enter' para comenzar", 210,50)
-
     }
 }
 
@@ -228,9 +264,9 @@ function firstBase(){
     bases.push(new Base())
 }
 
-function generatingBases(){
+function generatingBases(alto, largo){
     if(frames%80===0){
-        var alto = Math.floor((Math.random()*70+300))
+        var alto = Math.floor((Math.random()*470+210))
         var largo = Math.floor(Math.random()*50+ base_width)
         bases.push(new Base(alto, largo))
     }
@@ -247,9 +283,9 @@ function drawBases(){
 }
 
 //Bananas
-function generatingBananos(){
-    if(frames%250===0){
-        var alto2 = Math.floor((Math.random()*70+250))
+function generatingBananos(alto2){
+    if(frames%90===0){
+        var alto2 = Math.floor((Math.random()*190+90))
         bananitos.push(new Platanitos(alto2))
     }
 }
@@ -260,7 +296,11 @@ function drawBananos(){
         bananitos.forEach(function(bananito, index){
             bananito.draw()
             if(minion.minionGetsTheBanana(bananito)){
-                platanitos++
+                platanitosP1++
+                bananitos.splice(index,1)
+            }
+            if(minion2.minionGetsTheBanana(bananito)){
+                platanitosP2++
                 bananitos.splice(index,1)
             }
         })
@@ -301,6 +341,40 @@ function groundedCheck(minion, base){
     return collisionD
 }
 
+function groundedCheck2(minion, base){
+    var vecX = (minion2.x + (minion2.width/2) - (base.x + base_width/2))
+    var vecY = (minion2.y + (minion2.height/2) - (base.y + base_height/2))
+
+    var halfW = (minion2.width/2)+(base_width/2)
+    var halfH = (minion2.height/2)+(base_height/2)
+
+    var collisionD = null
+
+    if(Math.abs(vecX)<halfW && Math.abs(vecY)<halfH){
+        var offsetX = halfW - Math.abs(vecX)
+        var offsetY = halfH - Math.abs(vecY)
+
+        if(offsetX<offsetY){
+            if(vecX>0){
+                collisionD = "left"
+                minion2.x += offsetX
+            }else{
+                collisionD = "right"
+                minion2.x -= offsetX
+            }
+        }else{
+            if(vecY>0){
+                collisionD = "up"
+                minion2.y += offsetY
+            }else{
+                collisionD = "down"
+                minion2.y-= offsetY
+            }
+        }
+    }
+    return collisionD
+}
+
 function minionDies(){
     if(minion.willDie(canvas)){
         gameOver()
@@ -321,49 +395,100 @@ addEventListener('keyup', function(e){
     }
 })
 
-//Jump
-addEventListener('keyup', function(e){
-    switch(e.keyCode){
-        case 38:
-            if(!minion.jumping){
-                minion.velY = -minion.jumpStrenth*2
-                minion.jumping=true
-            }else{
-                minion.y-=155
-            }
-            break
-        default:
-            break
-    }
-})
 
-//Down
-addEventListener('keyup', function(e){
-    switch(e.keyCode){
-        case 40:
-            if(minion.grounded===true){
+//Minion 1
+    //Jump
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 38:
+                if(!minion.jumping){
+                    minion.velY = -minion.jumpStrenth*2
+                    minion.jumping=true
+                }else{
+                    minion.y-=155
+                }
                 break
-            }else{
-                minion.y+=100
-                break
-            }
             default:
-            break
-    }
-})
+                break
+        }
+    })
 
-//PowerUp
-addEventListener('keyup', function(e){
-    switch(e.keyCode){
-        case 32:
-            if(minion.x<500){
-                minion.x+=200
-            } else minion.x=550
-            break
-        default:
-            break
-    }
-})
+    //Down
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 40:
+                if(minion.grounded===true){
+                    break
+                }else{
+                    minion.y+=100
+                    break
+                }
+                default:
+                break
+        }
+    })
+
+    /*
+    //PowerUp
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 32:
+                if(minion.x<500){
+                    minion.x+=200
+                } else minion.x=550
+                break
+            default:
+                break
+        }
+    })
+    */
+
+//Minion 2
+    //Jump
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 87:
+                if(!minion2.jumping){
+                    minion2.velY = -minion2.jumpStrenth*2
+                    minion2.jumping=true
+                }else{
+                    minion2.y-=155
+                }
+                break
+            default:
+                break
+        }
+    })
+
+    //Down
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 83:
+                if(minion2.grounded===true){
+                    break
+                }else{
+                    minion2.y+=100
+                    break
+                }
+                default:
+                break
+        }
+    })
+
+    /*
+    //PowerUp
+    addEventListener('keyup', function(e){
+        switch(e.keyCode){
+            case 32:
+                if(minion.x<500){
+                    minion.x+=200
+                } else minion.x=550
+                break
+            default:
+                break
+        }
+    })
+    */
 
 
 drawCover()
