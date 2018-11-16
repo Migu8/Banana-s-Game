@@ -5,3 +5,8 @@ div{
     flex-direction: row;
     justify-content: space-evenly;
 }
+
+h1{
+    display: flex;
+    justify-content: center
+}

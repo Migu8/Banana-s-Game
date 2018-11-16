@@ -6,6 +6,7 @@ ctx = canvas.getContext('2d')
 var interval
 var contador = 20
 var restante
+var ganador
 
 var frames = 0
 var images = {
@@ -29,7 +30,7 @@ var platanitosP1=0
 var platanitosP2=0
 var bananitos = []
 var bananotes = []
-//var bananosMalos = []
+var bananosMalos = []
 var base_height = 20
 var base_width = 300
 
@@ -105,13 +106,13 @@ function Platanotes(alto3){
 function PlatanosMalos(alto4){
     Base.call(this)
     this.x=canvas.width+600
-    this.y = alto2 
-    this.width = 40
-    this.height = 55
+    this.y = alto4
+    this.width = 50
+    this.height = 65
     this.image.src = images.brocoli
 
     this.draw=function(){
-        this.x-=3
+        this.x-=5
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
@@ -138,6 +139,10 @@ function Character(src){
     this.boundaries = function(){
         if(this.y <10){
             this.y =10
+        }else if(this.x<10){
+            this.x =10
+        }else if(this.x>(canvas.width-150)){
+            this.x = (canvas.width-150)
         }else if(this.y>(canvas.height-130)){
             this.y = (canvas.height-130)
         }else this.y+=this.gravity
@@ -200,7 +205,7 @@ var minion2 = new Character(images.minion2)
 var minion = new Character(images.logo)
 var bananitos = new Platanitos()
 var bananotes = new Platanotes()
-//var bananosMalos = new PlatanosMalos()
+var bananosMalos = new PlatanosMalos()
 var bases = []
 
 
@@ -210,7 +215,7 @@ function start(){
     audio.play()
     bananitos = []
     bananotes = []
-    //bananosMalos = []
+    bananosMalos = []
     var minion = new Character()
     var minion2 = new Character()
     if(!interval) interval = setInterval(update, 1000/60)
@@ -229,7 +234,7 @@ function update(){
     drawBases()
     drawBananos()
     drawBananotes()
-    //drawBananosMalos()
+    drawBananosMalos()
     //console.log(platanitos)
     bg1.drawPlatanitos()
     if(restante===0){
@@ -248,12 +253,14 @@ function gameOver(){
     ctx.font = "bold 50px Arial"
     ctx.fillText("GAME FINISHED", 200,200)
     ctx.font = "bold 20px Arial"
-    ctx.fillText("Final score: " , 330,250)
+    ctx.fillText("Final score: " , 340,250)
     
-    ctx.fillText("Jugador 1:"+platanitosP1, 310,300)
-    ctx.fillText("Jugador 2:"+platanitosP2, 310,330)
-
-    ctx.fillText("Gana: ", 310,360)
+    ctx.fillText("Jugador 1: "+platanitosP1+" plátanos", 300,300)
+    ctx.fillText("Jugador 2: "+platanitosP2+" plátanos", 300,330)
+    if(platanitosP1>platanitosP2){
+        ganador = "Jugador 1"
+    }else ganador= "Jugador 2"
+    ctx.fillText("Gana: "+ganador, 330,360)
 }
 
 //Aux functions
@@ -308,7 +315,7 @@ function drawBases(){
 
 //Bananas chicas
 function generatingBananos(alto2){
-    if(frames%150===0){
+    if(frames%100===0){
         var alto2 = Math.floor((Math.random()*100+290))
         bananitos.push(new Platanitos(alto2))
     }
@@ -333,7 +340,7 @@ function drawBananos(){
 
 //Bananas grandes
 function generatingBananotes(alto3){
-    if(frames%290===0){
+    if(frames%220===0){
         var alto3 = Math.floor((Math.random()*100+250))
         bananotes.push(new Platanotes(alto3))
     }
@@ -359,7 +366,7 @@ function drawBananotes(){
 //Bananos malas
 function generatingBananosMalos(alto4){
     if(frames%190===0){
-        var alto4 = Math.floor((Math.random()*100+290))
+        var alto4 = Math.floor((Math.random()*180+290))
         bananosMalos.push(new PlatanosMalos(alto4))
     }
 }
@@ -371,10 +378,12 @@ function drawBananosMalos(){
             bananoMalo.draw()
             if(minion.minionGetsTheBanana(bananoMalo)){
                 platanitosP1-=3
+                if(platanitosP1<0) platanitosP1=0
                 bananosMalos.splice(index,1)
             }
             if(minion2.minionGetsTheBanana(bananoMalo)){
                 platanitosP2-=3
+                if(platanitosP2<0) platanitosP2=0
                 bananosMalos.splice(index,1)
             }
         })
@@ -447,12 +456,6 @@ function groundedCheck2(minion2, base){
         }
     }
     return collisionD
-}
-
-function minionDies(){
-    if(minion.willDie(canvas)){
-        gameOver()
-    }
 }
 
 //Listeners
