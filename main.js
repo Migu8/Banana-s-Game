@@ -4,14 +4,13 @@ ctx = canvas.getContext('2d')
 
 //Variables
 var interval
-var contador = 20
+var contador = 45
 var restante
 var ganador
 
 var frames = 0
 var images = {
     bg1: "images/bg1.png",
-    bg2: "images/bg2.png",
     logo: "images/minion_logo.png",
     banana: "images/banana.png",
     base: "images/base.png",
